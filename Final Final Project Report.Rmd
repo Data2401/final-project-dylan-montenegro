@@ -519,3 +519,4 @@ This analysis is intended to help aspiring or current IT professionals make a de
 My analysis was limited by the small number of responses per city, the main programming language used at work, and gender. We know that there is a bias towards Berlin and Munich because these two cities had a much larger amount of surveyees than every other city. There is also a bias in which gender gets paid the most because there were a lot more male surveyees. 
 
 Next, I would like to use the previous years' data and perform a time series analysis. I believe that this will allow me to have a larger pool of data to get an accurate representation of European IT professionals and their salaries, skills, and professions.
+
