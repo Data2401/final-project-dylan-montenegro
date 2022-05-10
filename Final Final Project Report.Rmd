@@ -36,7 +36,7 @@ Salaries <- read_csv('~/Desktop/Data2401/archive/IT Salary Survey EU  2020.csv')
 
 Salaries <- Salaries %>% rename(Base_Salary = `Yearly brutto salary (without bonus and stocks) in EUR`)
 
-Salaries <- Salaries %>% select(- c(Timestamp, `Years of experience in Germany`, `Yearly bonus + stocks in EUR`, `Other technologies/programming languages you use often`, `Annual brutto salary (without bonus and stocks) one year ago. Only answer if staying in the same country`, `Annual bonus+stocks one year ago. Only answer if staying in same country`, `Have you lost your job due to the coronavirus outbreak?`, `Have you been forced to have a shorter working week (Kurzarbeit)? If yes, how many hours per week`, `Have you received additional monetary support from your employer due to Work From Home? If yes, how much in 2020 in EUR`, `Employment status`, `Number of vacation days`))
+Salaries <- Salaries %>% select(- c(Timestamp, `Years of experience in Germany`, `Yearly bonus + stocks in EUR`, `Other technologies/programming languages you use often`, `Annual brutto salary (without bonus and stocks) one year ago. Only answer if staying in the same country`, `Annual bonus+stocks one year ago. Only answer if staying in same country`, `Have you lost your job due to the coronavirus outbreak?`, `Have you been forced to have a shorter working week (Kurzarbeit)? If yes, how many hours per week`, `Have you received additional monetary support from your employer due to Work From Home? If yes, how much in 2020 in EUR`, `Employment status`, `Number of vacation days`, `Contract duration`))
 
 
 x <- Salaries$`Your main technology / programming language`
