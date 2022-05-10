@@ -1,0 +1,521 @@
+---
+title: "2020 IT German Salaries"
+author: "Dylan Montenegro"
+date: "5/9/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+# Introduction
+For the aspiring or current IT professionals, this project will uncover salary insights on a wide variety of IT professions. The goal is to provide helpful decisions as to what profession to go or transition into, which programming language to know, which industry to go into, what size company to work in, and what German city to live in to make an average to above-average salary.
+
+To explore this relationship, I will be exploring a survey dataset about German IT professionals. I will be taking a close look into what the higher paid professionals have in terms of programming knowledge, the company type and size they work at, the number of years of experience they have, what seniority level they are at, and which city they live in. The goal is to bring to light new information that isn’t clear at first glance and use it to help others make life-changing decisions.
+
+Hence with my approach, I hope that my fellow aspiring or current IT professionals have a better understanding of what profession to go into or transition into.
+
+# Tools Required
+
+```{r, echo = TRUE}
+library(knitr) # used for dynamic report generation
+library(rmarkdown) # document conversion
+library(ggplot2) #used for data visualization
+library(plotly) #used for interactive plots
+library(dplyr) #used for data manipulation
+library(readr) #used to read rectangular data
+library(formattable) #used for formatted tables
+```
+
+# Data Import and Preparation
+
+## Source of the data
+```{r, echo=FALSE}
+Salaries <- read_csv('~/Desktop/Data2401/archive/IT Salary Survey EU  2020.csv')
+
+Salaries <- Salaries %>% rename(Base_Salary = `Yearly brutto salary (without bonus and stocks) in EUR`)
+
+Salaries <- Salaries %>% select(- c(Timestamp, `Years of experience in Germany`, `Yearly bonus + stocks in EUR`, `Other technologies/programming languages you use often`, `Annual brutto salary (without bonus and stocks) one year ago. Only answer if staying in the same country`, `Annual bonus+stocks one year ago. Only answer if staying in same country`, `Have you lost your job due to the coronavirus outbreak?`, `Have you been forced to have a shorter working week (Kurzarbeit)? If yes, how many hours per week`, `Have you received additional monetary support from your employer due to Work From Home? If yes, how much in 2020 in EUR`, `Employment status`, `Number of vacation days`))
+
+
+x <- Salaries$`Your main technology / programming language`
+Salaries$`Your main technology / programming language` <- toupper(x)
+
+
+main_tech_swap <- function(old, new1){ 
+    test <- Salaries      
+  test$`Your main technology / programming language`[test$`Your main technology / programming language` == old] <- new1
+  return(test)
+}
+
+
+experience_swap <- function(old2, new2){ 
+    test2 <- Salaries  
+    test2$`Total years of experience`[test2$`Total years of experience` == old2]  <- new2
+  return(test2)
+}
+
+
+company_type_swap <- function(old4, new4){
+  test4 <- Salaries
+  test4$`Company type`[test4$`Company type` == old4] <- new4
+  return(test4)
+}
+
+city_swap <- function(old5, new5){
+  test5 <- Salaries
+  test5$`City`[test5$`City` == old5] <- new5
+  return(test5)
+}
+
+main_language_swap <- function(old6, new6){
+  test6 <- Salaries
+  test6$`Main language at work`[test6$`Main language at work` == old6] <- new6
+  return(test6)
+}
+
+seniority_level_swap <- function(old7, new7){
+  test7 <- Salaries
+  test7$`Seniority level`[test7$`Seniority level` == old7] <- new7
+  return(test7)
+}
+
+position_swap <- function(old8, new8){
+  test8 <- Salaries
+  test8$`Position`[test8$`Position` == old8] <- new8
+  return(test8)
+}
+```
+
+```{r, echo=FALSE}
+Salaries <- main_tech_swap('SAS,SQL,PYTHON', 'SAS')
+Salaries <- main_tech_swap('ОФМФ', "JAVA")
+Salaries <- main_tech_swap('.NET, ANGULAR', '.NET')
+Salaries <- main_tech_swap('.NET, C++, SPSS, EMBEDDDED', '.NET')
+Salaries <- main_tech_swap('ANDROID/KOTLIN', 'ANDROID')
+Salaries <- main_tech_swap('ANGULAR, REACT','ANGULAR')
+Salaries <- main_tech_swap('ANGULAR, TYPESCRIPT','ANGULAR')
+Salaries <- main_tech_swap('ATLASSIAN JIRA','JIRA')
+Salaries <- main_tech_swap('AWS HADOOP POSTGRE TYPESCRIPT','AWS')
+Salaries <- main_tech_swap('AWS, GCP, PYTHON,K8S','AWS')
+Salaries <- main_tech_swap('AZURE, SAP','AZURE')
+Salaries <- main_tech_swap('BI, DWH, ETL/ELT','SAP')
+Salaries <- main_tech_swap('C, C++','C')
+Salaries <- main_tech_swap('C, MATLAB','C')
+Salaries <- main_tech_swap('C/C++','C')
+Salaries <- main_tech_swap('C#','C')
+Salaries <- main_tech_swap('C# .NET','C')
+Salaries <- main_tech_swap('C#, .NET CORE','C')
+Salaries <- main_tech_swap('C#/.NET','C')
+Salaries <- main_tech_swap('C++','C')
+Salaries <- main_tech_swap('C++, C#','C')
+Salaries <- main_tech_swap('C++, JAVA, EMBEDDED C','C')
+Salaries <- main_tech_swap('C++/C','C')
+Salaries <- main_tech_swap('C++/C#','C')
+Salaries <- main_tech_swap('DJANGO, FLASK, PLOTLY DASH','DJANGO')
+Salaries <- main_tech_swap('EMBEDDED C++','C')
+Salaries <- main_tech_swap('FRONTEND: REACT, NODE.JS','REACTJS')
+Salaries <- main_tech_swap('FRONTEND','REACTJS')
+Salaries <- main_tech_swap('GO, PHP, SQL','GO')
+Salaries <- main_tech_swap('GO/PYTHON','GO')
+Salaries <- main_tech_swap('GOLANG','GO')
+Salaries <- main_tech_swap('GRAILS, GROOVY','JAVA')
+Salaries <- main_tech_swap('JAVA / SCALA','JAVA')
+Salaries <- main_tech_swap('JAVA & DISTRIBUTED SYSTEMS STUFF','JAVA')
+Salaries <- main_tech_swap('JAVA & PHP','JAVA')
+Salaries <- main_tech_swap('JAVA BACKEND','JAVA')
+Salaries <- main_tech_swap('JAVA, .NET','JAVA')
+Salaries <- main_tech_swap('JAVA, ANGULAR, AWS','JAVA')
+Salaries <- main_tech_swap('JAVA, JAVASCRIPT','JAVA')
+Salaries <- main_tech_swap('JAVA, JS','JAVA')
+Salaries <- main_tech_swap('JAVA, KOTLIN','JAVA')
+Salaries <- main_tech_swap('JAVA, TERRAFORM','JAVA')
+Salaries <- main_tech_swap('JAVA/C++','JAVA')
+Salaries <- main_tech_swap('JAVA/GROOVY','JAVA')
+Salaries <- main_tech_swap('JAVA/KOTLIN','JAVA')
+Salaries <- main_tech_swap('JAVA/SCALA','JAVA')
+Salaries <- main_tech_swap('JAVA/SCALA/GO/CLOUDS/DEVOPS','JAVA')
+Salaries <- main_tech_swap('JAVASCRIPT / TYPESCRIPT','JAVASCRIPT')
+Salaries <- main_tech_swap('JAVASCRIPT, TYPESCRIPT','JAVASCRIPT')
+Salaries <- main_tech_swap('JAVASCRIPT, ANGULAR','JAVASCRIPT')
+Salaries <- main_tech_swap('JAVASCRIPT/ES6','JAVASCRIPT')
+Salaries <- main_tech_swap('JAVSCRIPT','JAVASCRIPT')
+Salaries <- main_tech_swap('JAVASCRIPT/TYPESCRIPT','JAVASCRIPT')
+Salaries <- main_tech_swap('JS, JAVA','JAVASCRIPT')
+Salaries <- main_tech_swap('KOTLIN, JAVA','KOTLIN')
+Salaries <- main_tech_swap('PYTHON / JAVASCRIPT (REACT)','PYTHON')
+Salaries <- main_tech_swap('REACT / JAVASCRIPT','REACTJS')
+Salaries <- main_tech_swap('TYPESCRIPT, JAVASCRIPT','TYPESCRIPT')
+Salaries <- main_tech_swap('JENKINS BASH','JAVA')
+Salaries <- main_tech_swap('JS','JAVASCRIPT')
+Salaries <- main_tech_swap('JS, JAVA','JAVASCRIPT')
+Salaries <- main_tech_swap('JS, REACTJS','JAVASCRIPT')
+Salaries <- main_tech_swap('JS, TYPESCRIPT, ANGULAR','JAVASCRIPT')
+Salaries <- main_tech_swap('JS, WDIO','JAVASCRIPT')
+Salaries <- main_tech_swap('KOTLIN, JAVA','KOTLIN')
+Salaries <- main_tech_swap('KOTLIN/PHP','KOTLIN')
+Salaries <- main_tech_swap('KUBERENETES, OPENSTACK','KUBERNETES')
+Salaries <- main_tech_swap('KUBERNETES, TERRAFORM, GCP','KUBERNETES')
+Salaries <- main_tech_swap('KUBRRNETES','KUBERNETES')
+Salaries <- main_tech_swap('LINUX KERNEL','LINUX')
+Salaries <- main_tech_swap('LINUX/UNIX, GIT, VIRTUALISATION PLATFORMS, *SHELL(S) SCRIPTS','LINUX')
+Salaries <- main_tech_swap('ML/PYTHON','ML')
+Salaries <- main_tech_swap('NLP, PYTHON','PYTHON')
+Salaries <- main_tech_swap('NODE','NODEJS')
+Salaries <- main_tech_swap('NODEJS, TYPESCRIPT, AWS','NODEJS')
+Salaries <- main_tech_swap('NODEJS/TS','NODEJS')
+Salaries <- main_tech_swap('NODSJS','NODEJS')
+Salaries <- main_tech_swap('NODE.JS', 'NODEJS')
+Salaries <- main_tech_swap('OBJECTIVE-C ','C')
+Salaries <- main_tech_swap('PASCAL, VB.NET, C#','PASCAL')
+Salaries <- main_tech_swap('PHP, JS, PYTHON, DOCKER','PHP')
+Salaries <- main_tech_swap('PHP/MYSQL','PHP')
+Salaries <- main_tech_swap('PL/SQL','PL')
+Salaries <- main_tech_swap('PS, SKETCH, REACT, CSS3','PS')
+Salaries <- main_tech_swap('PYRHON','PYTHON')
+Salaries <- main_tech_swap('PYTHIN','PYTHON')
+Salaries <- main_tech_swap('PYTHON (DJANGO)','PYTHON')
+Salaries <- main_tech_swap('PYTHON + SQL','PYTHON')
+Salaries <- main_tech_swap('PYTHON, CLOUD COMPUTING','PYTHON')
+Salaries <- main_tech_swap('PYTHON, DATABASE TECHNOLOGIES','PYTHON')
+Salaries <- main_tech_swap('PYTHON, PYTORCH','PYTHON')
+Salaries <- main_tech_swap('PYTHON, SCALA','PYTHON')
+Salaries <- main_tech_swap('PYTHON, SQL','PYTHON')
+Salaries <- main_tech_swap('PYTHON, STATISTICS, SQL','PYTHON')
+Salaries <- main_tech_swap('PYTHON, WHOLE APACHE DATA SCIENCE STACK, AWS','PYTHON')
+Salaries <- main_tech_swap('PYTHON/NLP','PYTHON')
+Salaries <- main_tech_swap('PYTHON/SQL','PYTHON')
+Salaries <- main_tech_swap('QLIK BI TOOL, SQL','QLIK')
+Salaries <- main_tech_swap('REACT / JAVASCRIPT','REACTJS')
+Salaries <- main_tech_swap('REACT JS','REACTJS')
+Salaries <- main_tech_swap('REACT.JS / TYPESCRIPT','REACTJS')
+Salaries <- main_tech_swap('REACT/TYPESCRIPT','REACTJS')
+Salaries <- main_tech_swap('SAP / ABAP','ABAP')
+Salaries <- main_tech_swap('SAP ABAP','ABAP')
+Salaries <- main_tech_swap('SAP BW / ABAP','ABAP')
+Salaries <- main_tech_swap('SCALA / PYTHON','SCALA')
+Salaries <- main_tech_swap('SCALA, APACHE SPARK','SCALA')
+Salaries <- main_tech_swap('SCALA, REACT.JS','SCALA')
+Salaries <- main_tech_swap('SKETCH, FIGMA','SKETCH')
+Salaries <- main_tech_swap('SPARK, PYTORCH','SPARK')
+Salaries <- main_tech_swap('SQL, BQ, TABLEAU, GTM, GA','SQL')
+Salaries <- main_tech_swap('SWIFT, OBJECTIVE-C','SWIFT')
+Salaries <- main_tech_swap('SWIFT, OBJECTIVE-C, IOS','SWIFT')
+Salaries <- main_tech_swap('SWIFT/KOTLIN','SWIFT')
+Salaries <- main_tech_swap('TERRAFORM, KUBERNETES, AWS, GCP, ANSIBLE, PUPPET','TERRAFORM')
+Salaries <- main_tech_swap('TS','TYPESCRIPT')
+Salaries <- main_tech_swap('TYPESCRIPT / ANGULAR','TYPESCRIPT')
+Salaries <- main_tech_swap('TYPESCRIPT, JAVASCRIPT','TYPESCRIPT')
+Salaries <- main_tech_swap('TYPESCRIPT, KOTLIN','TYPESCRIPT')
+Salaries <- main_tech_swap('TYPESCRIPT, REACT','TYPESCRIPT')
+Salaries <- main_tech_swap('TYPESCRIPT, WEB APPS','TYPESCRIPT')
+Salaries <- main_tech_swap('TYPESCRIPT/ANGULAR','TYPESCRIPT')
+Salaries <- main_tech_swap('Java', 'JAVA')
+Salaries <- main_tech_swap('GOOGLE CLOUD PLATFORM', 'GCP')
+Salaries <- main_tech_swap('OBJECTIVE-C', 'C')
+Salaries <- main_tech_swap('APACHE SPARK', 'SPARK')
+Salaries <- main_tech_swap('REACT', 'REACTJS') 
+Salaries <- main_tech_swap('RUBY ON RAILS', 'RUBY')
+Salaries <- main_tech_swap('T-SQL', 'SQL')
+
+Salaries <- experience_swap('1 (as QA Engineer) / 11 in total', '1')
+Salaries <- experience_swap('15, thereof 8 as CTO', '15')
+Salaries <- experience_swap('2,5', '2.5')
+Salaries <- experience_swap('383', '38')
+Salaries <- experience_swap('6 (not as a data scientist, but as a lab scientist)', '0')
+Salaries <- experience_swap('less than year', '0.8')
+Salaries <- experience_swap('1,5', '1.5')
+
+
+
+Salaries <- company_type_swap('e-commerce', 'Ecommerce')
+Salaries <- company_type_swap('E-commerce', 'Ecommerce')
+Salaries <- company_type_swap('E-Commerce', 'Ecommerce')
+Salaries <- company_type_swap('eCommerce', 'Ecommerce')
+Salaries <- company_type_swap('Financial', 'Finance')
+Salaries <- company_type_swap('Full-time position in Education, part-time position in at a data startup', 'Education')
+Salaries <- company_type_swap('Game Company', 'Gaming')
+Salaries <- company_type_swap('Fintech', 'Finance')
+Salaries <- company_type_swap('Outsourse', 'Outsource')
+Salaries <- company_type_swap('Research institute', 'Research')
+Salaries <- company_type_swap('consumer goods', 'Product')
+Salaries <- company_type_swap('Outsorce', 'Outsource')
+Salaries <- company_type_swap('Consulting and Product', 'Consulting / Agency')
+Salaries <- company_type_swap('IT-Outsourcing', 'Outsource')
+Salaries <- company_type_swap('Non-tech retail', 'Retail')
+Salaries <- company_type_swap('Market Research', 'Research')
+Salaries <- company_type_swap('Old industry', 'Industry')
+
+Salaries <- city_swap('Boeblingen' , 'Bölingen')
+Salaries <- city_swap('Braunschweig' , 'Brunswick')
+Salaries <- city_swap('Zurich' , 'Zürich')
+Salaries <- city_swap('Warsaw, Poland' , 'Warsaw')
+Salaries <- city_swap('warsaw' , 'Warsaw')
+Salaries <- city_swap('Nuremberg' , 'Nürnberg')
+Salaries <- city_swap('Milan' , 'Milano')
+Salaries <- city_swap('Fr' , 'France')
+Salaries <- city_swap('Konstanz area' , 'Konstanz')
+Salaries <- city_swap('Duesseldorf' , 'Düsseldorf')
+Salaries <- city_swap('Dusseldorf' , 'Düsseldorf')
+Salaries <- city_swap('Dusseldurf' , 'Düsseldorf')
+
+Salaries <- main_language_swap('Русский' , 'Russian')
+Salaries <- main_language_swap('50/50', 'English')
+Salaries <- main_language_swap('both', 'English')
+Salaries <- main_language_swap('Russian, English', 'Russian')
+Salaries <- main_language_swap('English and German', 'English')
+
+Salaries <- seniority_level_swap('C-level executive manager', 'C-Level')
+Salaries <- seniority_level_swap('CTO', 'C-Level')
+Salaries <- seniority_level_swap('intern', 'Intern')
+Salaries <- seniority_level_swap('student', 'Student')
+Salaries <- seniority_level_swap('Working Student', 'Student')
+Salaries <- seniority_level_swap('Work Center Manager' , 'Manager')
+Salaries <- seniority_level_swap('No level', 'Entry level')
+Salaries <- seniority_level_swap('no idea, there are no ranges in the firm', 'Entry level')
+
+Salaries <- position_swap('Dana Analyst' , 'Data Analyst')
+Salaries <- position_swap('Data analyst' , 'Data Analyst')
+Salaries <- position_swap('Engineering manager' , 'Engineering Manager')
+Salaries <- position_swap('Full-Stack Developer' , 'Fullstack Developer')
+Salaries <- position_swap('Fullstack engineer, ну или Software engineer' , 'Software Engineer')
+Salaries <- position_swap('Big Data Engineer' , 'Data Engineer')
+Salaries <- position_swap('data engineer', 'Data Engineer')
+Salaries <- position_swap('Data Engineer' , 'Data Engineer')
+Salaries <- position_swap('Account Managet' , 'Account Manager')
+Salaries <- position_swap('DBA' , 'Database Administrator')
+Salaries <- position_swap('IT Spezialist' , 'IT Specialist')
+Salaries <- position_swap('Project manager' , 'Project Manager')
+Salaries <- position_swap('Rentner' , 'Pensioner')
+Salaries <- position_swap('Researcher/ Consumer Insights Analyst' , 'Researcher')
+Salaries <- position_swap('Security engineer' , 'Security Engineer')
+Salaries <- position_swap('Software Architekt' , 'Software Architect')
+Salaries <- position_swap('Solution Architect' , 'Solutions Architect')
+Salaries <- position_swap('Solutions architect' , 'Solutions Architect')
+Salaries <- position_swap('SRE' , 'Site Reliability Engineer')
+Salaries <- position_swap('support engineer' , 'Support Engineer')
+Salaries <- position_swap('Systemadministrator' , 'System Administrator')
+Salaries <- position_swap('Team lead' , 'Team Lead')
+Salaries <- position_swap('Teamlead' , 'Team Lead')
+Salaries <- position_swap('Tech Lead / Full-Stack' , 'Tech Lead')
+Salaries <- position_swap('Tech Leader' , 'Tech Lead')
+Salaries <- position_swap('Technical Lead' , 'Tech Lead')
+Salaries <- position_swap('Testmanager' , 'Test Manager')
+Salaries <- position_swap('Test manager' , 'Test Manager')
+Salaries <- position_swap('DatabEngineer' , 'Data Engineer')
+
+
+Salaries$`Total years of experience` <- as.numeric(as.character(Salaries$`Total years of experience`))
+
+```
+
+IT Salary Survey for EU Region(2018-2020) (https://www.kaggle.com/datasets/parulpandey/2020-it-salary-survey-for-eu-region?resource=download) I sourced this data from the Kaggle public datasets. The survey was made and has been conducted by Sergey Vasilyev since 2015. The purpose of this data was to help discover salary patterns among the IT professionals in the EU region.
+```{r}
+headsal <- head(Salaries)
+formattable(headsal)
+```
+**Variable names and definition: Age- age of surveyee, Gender- gender of surveyee, City- city the surveyee works in, Position- position the surveyee works as, Total years of experience- number of years of experience the surveyee has, Seniority level- surveyee's seniority level,  Base_Salary- surveyee's base salary, Your main technology/programming language- the surveyee's main programming language or technology used at work, Contract duration- surveyee's period through which their contract is effective, Company size- number of people that work at the surveyee's job, Company type- the industry the surveyee works in.** 
+
+# Exploratory Data Analysis And Visualization
+I added three new variable: number_responses_per_city- the total amount of responses per city, number_people_per_position- the total number of people who work the same position, number_people_per_main_tech- the total number of people who use the same technology/programming language at work.
+```{r}
+Salaries <- Salaries %>% group_by(City) %>% mutate(number_responses_per_city = n())
+Salaries <- Salaries %>% group_by(Position) %>% mutate(number_people_per_position = n())
+Salaries <- Salaries %>% group_by(`Your main technology / programming language`) %>% mutate(number_people_per_main_tech= n())
+
+headsal <- head(Salaries)
+formattable(headsal)
+```
+
+
+Upon exploring the dataset, I noticed that about half of the cities from which there were surveyee's only had one response, some technologies/programming languages had very few people using them, two people said that they made an unrealistic amount of money, a few people didn't give their gender, and two people put that their gender was diverse. In order to have an accurate representation of the  majority of the surveyee's, I filtered down the data to people who made less than a million euros, whose gender was male or female, the technologies/programming languages that had more than nine people using them, and the cities that had more than nine responses. This boiled down to only 949 responses of the original 1253.  
+```{r, echo=TRUE}
+Sex <- c("Male", "Female")
+Salaries2 <- Salaries %>% filter(number_responses_per_city >= 10 & Base_Salary < 1000000 & Gender %in% Sex & number_people_per_main_tech > 9)
+headsal2 <- head(Salaries2)
+formattable(headsal2)
+
+```
+### Age Distributions
+
+In order to justify the cutting down of responses, I looked at the mean and median age of both the original and filtered down datasets. 
+```{r}
+mean_age <-Salaries %>% pull(Age) %>% mean(na.rm = TRUE)
+median_age <- Salaries %>% pull(Age) %>% median(na.rm = TRUE)
+Age <- Salaries %>% ggplot(aes(x= Age)) + geom_density(fill = "dark blue", alpha = .5) + geom_vline(aes(xintercept = mean_age), size = 1, color = 'red') + geom_vline(aes(xintercept = median_age), size = 1, color = 'orange') + labs(title = 'Age Distribution For Salaries')
+ggplotly(Age)
+
+
+mean_age2 <-Salaries2 %>% pull(Age) %>% mean(na.rm = TRUE)
+median_age2 <- Salaries2 %>% pull(Age) %>% median(na.rm = TRUE)
+Age2 <- Salaries2 %>% ggplot(aes(x= Age)) + geom_density(fill = "dark blue", alpha = .5) + geom_vline(aes(xintercept = mean_age2), size = 1, color = 'red') + geom_vline(aes(xintercept = median_age2), size = 1, color = 'orange') + labs(title = 'Age Distribution For Salaries2')
+ggplotly(Age2)
+```
+The original datasets mean age is 32.51 while the median age is 32. The filtered down datasets mean age is 32.5 while the median age is 32. The mean and median ages for both datasets didn't shift very much. 
+
+### Gender Counts
+
+In order to justify the cutting down of responses, I looked at the number of surveyee's by gender of both the original and filtered down datasets. 
+
+```{r}
+
+GenderCount1 <- Salaries %>% group_by(Gender) %>% tally() %>%  arrange(desc(n)) %>%  na.omit()
+formattable(GenderCount1, align = c('l'))
+
+
+GenderCount2 <- Salaries2 %>% group_by(Gender) %>% tally() %>%  arrange(desc(n)) %>%  na.omit()
+formattable(GenderCount2, align = c('l'))
+```
+About 77% of males and 73% females are left. Although a larger amount of males were cut out, but this is still an accurate representation of the original data because the proportion of males to females only slightly changed after the filtering.
+
+### City Counts
+
+In order to justify the cutting down of responses, I looked at the number of surveyee's per city of both the original and filtered down datasets. 
+
+```{r}
+CityCount <- Salaries %>% group_by(City) %>% tally() %>% arrange(desc(n)) %>% head(10)
+formattable(CityCount, align = c('l'))
+
+CityCount2 <-Salaries2 %>% group_by(City) %>% tally() %>% arrange(desc(n))
+formattable(CityCount2, align = c('l'))
+```
+After comparing the number of responses for the cities with the most responses, the number of responses per city kept were about 66% and up. 
+
+### Position Counts
+
+In order to justify the cutting down of responses, I looked at the number of surveyee's per position of both the original and filtered down datasets. 
+
+```{r}
+PositionCount <- Salaries %>% group_by(Position) %>% tally() %>% arrange(desc(n)) %>% head(10)
+formattable(PositionCount, align = c('l'))
+
+PositionCount2 <- Salaries2 %>% group_by(Position) %>% tally() %>% arrange(desc(n))%>% head(10)
+formattable(PositionCount2, align = c('l'))
+```
+After the filtering, we still have a good variety of responses per position. Our top ten positions remained the same between both datasets with some mild ordering change.
+
+### Experience Distribution
+```{r}
+mean_exp <-Salaries %>% pull(`Total years of experience`) %>% mean(na.rm = TRUE)
+median_exp <- Salaries %>% pull(`Total years of experience`) %>% median(na.rm = TRUE)
+Exp <- Salaries %>% ggplot(aes(x= `Total years of experience`)) + geom_density(fill = "dark blue", alpha = .5) + geom_vline(aes(xintercept = mean_exp), size = 1, color = 'red') + geom_vline(aes(xintercept = median_exp), size = 1, color = 'orange') + labs(title = 'Experience Distribution', x= 'Total Years of Experience')
+ggplotly(Exp)
+
+
+mean_exp2 <-Salaries2 %>% pull(`Total years of experience`) %>% mean(na.rm = TRUE)
+median_exp2 <- Salaries2 %>% pull(`Total years of experience`) %>% median(na.rm = TRUE)
+Exp2 <- Salaries2 %>% ggplot(aes(x= `Total years of experience`)) + geom_density(fill = "dark blue", alpha = .5) + geom_vline(aes(xintercept = mean_exp2), size = 1, color = 'red') + geom_vline(aes(xintercept = median_exp2), size = 1, color = 'orange') + labs(title = 'Experience Distribution', x = 'Total Years of Experience')
+ggplotly(Exp2)
+```
+The original datasets mean number of years of experience is 8.76 years while the median is 8 years. The filtered down datasets mean number of years of experience is 8.86 years while the median is 8 years. The mean and median years of experience for both datasets didn't shift very much and shows that we can move further with the new data.
+
+### Seniority Counts
+```{r}
+SalariesCount <- Salaries %>% group_by(`Seniority level`) %>% tally() %>% arrange(desc(n)) %>% na.omit() %>% head()
+formattable(SalariesCount, align = c('l'))
+
+SalariesCount2 <- Salaries2 %>% group_by(`Seniority level`) %>% tally() %>% arrange(desc(n)) %>% na.omit() %>% head()
+formattable(SalariesCount2, align = c('l'))
+```
+Looking at the number of surveyee's per seniority level in both datasets, we do see a big difference, but every position has kept at least 60% of their responses after the filtering. The top 5 seniority levels remained constant in both datasets.
+
+### Main Language Counts
+```{r}
+LanguageCount <- Salaries %>% group_by(`Main language at work`) %>% tally() %>% arrange(desc(n)) %>% na.omit()%>% head(5)
+formattable(LanguageCount, align = c('l'))
+
+LanguageCount2 <- Salaries2 %>% group_by(`Main language at work`) %>% tally() %>% arrange(desc(n)) %>% na.omit()
+formattable(LanguageCount2, align = c('l'))
+```
+After comparing the number of surveyee's per main language used at work, English remained the most common language in the workplace. German and Russian came in second and third, respectively.
+
+### Main Tech Counts
+```{r}
+TechCount <- Salaries %>% group_by(`Your main technology / programming language`) %>% tally() %>% arrange(desc(n)) %>% na.omit()%>% head(10) 
+formattable(TechCount, align = c('l')) 
+
+TechCount2 <- Salaries2 %>% group_by(`Your main technology / programming language`) %>% tally() %>% arrange(desc(n)) %>% na.omit()%>% head(10)
+formattable(TechCount2, align = c('l'))
+```
+Comparing the two datasets for the main technology/programming language used at work, our top ten programming languages remained the same even though the ordering changed. Python was originally the main used language, but in the filtered down dataset we have Java as the top one. 
+
+### Salary Distributions
+
+```{r}
+mean_salary <-Salaries %>% filter(Base_Salary < 1000000) %>%  pull(Base_Salary) %>% mean(na.rm = TRUE)
+median_salary <- Salaries %>% filter(Base_Salary < 1000000) %>% pull(Base_Salary) %>% median(na.rm = TRUE)
+Salary<- Salaries %>% filter(Base_Salary < 1000000) %>%  ggplot(aes(x = Base_Salary)) + geom_density(fill = 'blue', alpha = .5) + geom_vline(aes(xintercept = mean_salary), size = .8, color = 'red') + geom_vline(aes(xintercept = median_salary), size = .8, color = 'orange') + labs(title = 'Base Salary In Euros Distribution', x = 'Base Salary(Euro)')
+options(scipen = 999)
+ggplotly(Salary)
+
+mean_salary2 <-Salaries2 %>% filter(Base_Salary < 1000000) %>%  pull(Base_Salary) %>% mean(na.rm = TRUE)
+median_salary2 <- Salaries2 %>% filter(Base_Salary < 1000000) %>% pull(Base_Salary) %>% median(na.rm = TRUE)
+Salary2 <- Salaries2 %>% filter(Base_Salary < 1000000) %>%  ggplot(aes(x = Base_Salary)) + geom_density(fill = 'blue', alpha = .5) + geom_vline(aes(xintercept = mean_salary2), size = .8, color = 'red') + geom_vline(aes(xintercept = median_salary2), size = .8, color = 'orange') + labs(title = 'Base Salary In Euros Distribution', x = "Base Salary(Euro)")
+options(scipen = 999)
+ggplotly(Salary2)
+```
+The mean salary in the original dataset is 71,655 euros while the median salary is 70,000 euros. The mean salary in the filtered dataset is 73,557 euros while the median salary is 70,000 euros. Both, the mean and median salaries, between the two datasets do not differ by much if by anything at all.
+
+## Experience Vs Salary
+### Gender
+**Which gender gets paid more?** It turns out that males get paid more in general.
+```{r}
+ExpGenderVSalary <- Salaries2 %>% ggplot(aes(x = `Total years of experience`, y = Base_Salary, fill = Gender)) + geom_point(alpha = .5) + scale_x_log10() + scale_y_log10() +labs(title = 'Experience vs Salary Based On Gender', x = 'Total Years of Experience', y = 'Base Salary in Euros') + facet_wrap(~ Gender)
+ggplotly(ExpGenderVSalary)
+
+```
+
+### City
+**What city has a higher salary range?** It looks like the highest paying cities are Berlin and Munich.
+```{r}
+ExpCityVSalary <- Salaries2 %>% ggplot(aes(x = `Total years of experience`, y = Base_Salary, fill = City)) + geom_point(alpha = .5) + scale_x_log10()+ scale_y_log10() +labs(title = 'Experience vs Salary Based On Location', x = 'Total Years of Experience', y = 'Base Salary in Euros') + facet_wrap(~ City)
+ggplotly(ExpCityVSalary)
+```
+
+
+### Technology/Programming Language
+**What technology/programming language should you learn?** In order to receive a higher base salary, it looks like a person needs to know Python, Java, C, or Go.
+```{r}
+ExpProgramVSalary <- Salaries2 %>% ggplot(aes(x = `Total years of experience`, y = Base_Salary, fill = `Your main technology / programming language`)) + geom_point(alpha = .5) + scale_x_log10() + scale_y_log10() + labs(title = 'Experience vs Salary Based On Main Programming Language Used', x = 'Total Years of Experience', y = 'Base Salary in Euros')
+ggplotly(ExpProgramVSalary)
+```
+
+
+### Position
+**What position should I am to work as?** It turns out that the highest paying positions are data scientist, software engineer, and backend developer.
+```{r}
+ExpPositionVSalary <- Salaries2 %>% ggplot(aes(x = `Total years of experience`, y = Base_Salary, fill = Position)) + geom_point(alpha = .5) + scale_x_log10()+ scale_y_log10() +labs(title = 'Experience vs Salary Based On Position', x = 'Total Years of Experience', y = 'Base Salary in Euros')
+ggplotly(ExpPositionVSalary)
+```
+
+### Seniority Level
+**What seniority level should you strive for?** In order to receive a higher base salary, a person should strive to work at some kind of management level such as a head, a lead, or a senior.
+```{r}
+ExpSeniorityVSalary <- Salaries2 %>% ggplot(aes(x = `Total years of experience`, y = Base_Salary, fill = `Seniority level`)) + geom_point(alpha = .5) + scale_x_log10() + scale_y_log10() +labs(title = 'Experience vs Salary Based On Seniority Level', x = 'Total Years of Experience', y = 'Base Salary in Euros')
+ggplotly(ExpSeniorityVSalary)
+```
+
+
+### Company Size
+**What size company should you work at?** It turns out that the company size a person should work at to receive a higher salary doesn't really matter. Although, in general, someone should work at a company with 50+ people.
+```{r}
+ExpCompSizeVSalary <- Salaries2 %>% ggplot(aes(x = `Total years of experience`, y = Base_Salary, fill = `Company size`)) + geom_point(alpha = .5) + scale_x_log10() + scale_y_log10() +labs(title = 'Experience vs Salary Based On Company Size', x = 'Total Years of Experience', y = 'Base Salary in Euros')
+ggplotly(ExpCompSizeVSalary)
+```
+
+### Company Type
+**What type of company should you work at?** In order to receive a higher base salary, a person should try to work at a start up or a product company.
+```{r}
+ExpCompTypeVSalary <- Salaries2 %>% ggplot(aes(x = `Total years of experience`, y = Base_Salary, fill = `Company type`)) + geom_point(alpha = .5) + scale_x_log10() + scale_y_log10() +labs(title = 'Experience vs Salary Based On Company Type', x = 'Total Years of Experience', y = 'Base Salary in Euros')
+ggplotly(ExpCompTypeVSalary)
+```
+
+# Summary
+This analysis is intended to help aspiring or current IT professionals make a decision as to what profession to go or transition into, what tools are needed, what city to live in, what company size to work for, and what kind of company to work for. Hopefully, through data visualization, people can decide what profession to pursue.
+
+**Insights** It turns out that in order to make a decent living in Germany, someone should work at a product or startup, they should know Go, Python, Java, or C, live in Berlin or Munich, work as a data scientist, software engineer, or backend developer, work at a company with 50+ people, and work their way up to some kind of management position. It also turns out that any person that knows English will be able to move to Germany and have no issue transitioning into a Germany-based company because English is widely used.
+
+My analysis was limited by the small number of responses per city, the main programming language used at work, and gender. We know that there is a bias towards Berlin and Munich because these two cities had a much larger amount of surveyees than every other city. There is also a bias in which gender gets paid the most because there were a lot more male surveyees. 
+
+Next, I would like to use the previous years' data and perform a time series analysis. I believe that this will allow me to have a larger pool of data to get an accurate representation of European IT professionals and their salaries, skills, and professions.
